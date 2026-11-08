@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="utf-8">
+    <title>Bank Group Project</title>
+</head>
+<body style="font-family:system-ui,sans-serif;max-width:700px;margin:3rem auto">
+
+    <p><a href="{% url 'home' %}">← Front page</a></p>
+
+    <h1>Search friends</h1>
+
+    <form method="get">
+        <label>
+            Name
+            <input type="text" name="username" value="{{ username }}">
+        </label>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if username %}
+        <h2>Results</h2>
+        <ul>
+            {% for name in results %}
+                <li>{{ name.0 }}</li>
+            {% empty %}
+                <li>No one found.</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</body>
+</html>

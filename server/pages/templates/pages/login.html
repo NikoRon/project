@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head><meta charset="utf-8"><title>Log in – Bank Group Project Ltd</title></head>
+<body style="font-family:system-ui,sans-serif;max-width:540px;margin:3rem auto">
+    <h1>Bank Group Project Ltd</h1>
+    <p><strong>Your safe banking partner!</strong></p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Log in</button>
+    </form>
+</body>
+</html>

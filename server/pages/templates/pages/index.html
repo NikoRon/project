@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Bank</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 700px; margin: 3rem auto; padding: 0 1rem; color: #182638; }
+        section { padding: 1.2rem; margin: 1rem 0; background: #f2f5fa; border-radius: 10px; }
+        input, select, button { padding: .5rem; margin: .3rem 0; }
+        .warning { color: #923a00; font-weight: bold; }
+        nav a { margin-right: 1rem; }
+    </style>
+</head>
+<body>
+    <h1>Bank Group Project Ltd</h1>
+    <p class="warning">Successfully logged in</p>
+    <nav><a href="{% url 'home' %}">Front page</a><a href="{% url 'search' %}">Search users</a>
+        {% if user.is_staff %}<a href="{% url 'audit' %}">Event history</a>{% endif %}</nav>
+    <section>
+        <h2>Your account</h2>
+        <p>User: <strong>{{ user.username }}</strong></p>
+        <p>Amount: <strong>{{ user.account.balance }} €</strong></p>
+        <p>Your personal <datalist></datalist>ata in JSON: <a href="{% url 'balance' %}">/balance/</a></p>
+    </section>
+
+    {% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}
+
+    <section>
+        <h2>Transfer</h2>
+        <form action="{% url 'transfer' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="from_user" value="{{ user.username }}">
+            <label>Receiver
+                <select name="to">
+                    {% for account in accounts %}
+                        {% if account.user_id != user.id %}
+                            <option value="{{ account.user.username }}">{{ account.user.username }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Amount (€) <input type="number" name="amount" min="1" step="1" required></label>
+            <button type="submit">Transfer</button>
+        </form>
+    </section>
+
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+    </form>
+</body>
+</html>

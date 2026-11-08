@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head><meta charset="utf-8"><title>Event history – Banking Group Project Ltd</title></head>
+<body style="font-family:system-ui,sans-serif;max-width:700px;margin:3rem auto">
+    <p><a href="{% url 'home' %}">← Front page</a></p>
+    <h1>Event history</h1>
+    <p>Transaction history</p>
+    <ul>
+        {% for event in events %}
+            <li>{{ event.created_at }} – {{ event.username }} – {{ event.event }}</li>
+        {% empty %}
+            <li>No events.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
