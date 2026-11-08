@@ -1,6 +1,6 @@
 # MOOC Cybersecurity project software - 5 flaws and their fixes
 
-This Django-app is based on part2-13.sessionhijack -task, as it provides a good basis for the software.
+This Django-app is based on part2-13.sessionhijack -task, as it provides a good basis for the software. This is simple "banking"-app where one can log in to their account and transfer money to other, within their account's amount of course.
 
 ### Initial adjustments:
 1. Install new (enough) Python and Django (make sure they work together)
