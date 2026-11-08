@@ -21,7 +21,7 @@
         <h2>Your account</h2>
         <p>User: <strong>{{ user.username }}</strong></p>
         <p>Amount: <strong>{{ user.account.balance }} €</strong></p>
-        <p>Your personal <datalist></datalist>ata in JSON: <a href="{% url 'balance' %}">/balance/</a></p>
+        <p>Your personal <datalist></datalist>data in JSON: <a href="{% url 'balance' %}">View personal data that bank has about you.</a></p>
     </section>
 
     {% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}

@@ -3,15 +3,15 @@
 This Django-app is based on part2-13.sessionhijack -task, as it provides a good basis for the software.
 
 ### Initial adjustments:
-1. Install new (enough) Python
+1. Install new (enough) Python and Django (make sure they work together)
 2. Unzip the file and copy the path of manage.py
 3. Run the followin lines:
 
-```bash
-python -m pip install -r requirements.txt
+```Powershell
+python manage.py makemigrations
 python manage.py migrate
 python manage.py seed_demo
-python manage.py runserver 127.0.0.1:8000
+python manage.py runserver
 ```
 
 4. Open `http://127.0.0.1:8000/login/`.
