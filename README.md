@@ -49,14 +49,6 @@ Only admin has access to event history from `/audit/`.
 - A07: Inspect the `sessionid` cookie using your browser's developer tools.
 - A09: Perform a transfer and an unsuccessful login attempt, then access `/audit/` as an administrator.
 
-## Testing
-
-```bash
-python manage.py test server.pages.test_owasp
-```
-
-Seven tests verify the current **vulnerable baseline state** as well as the application's core functionality. As we fix the vulnerabilities one by one, we will update the corresponding OWASP test to expect secure behavior.
-
 ## What is intended to be fixed later?
 
 During the remediation phase, A01, A02, A03, A07, and A09 will be addressed individually.
