@@ -1,15 +1,11 @@
-# OWASP Top 10:2021 – tarkoituksella haavoittuva harjoituspankki
+# MOOC Cybersecurity project software - 5 flaws and their fixes
 
-Tämä Django-sovellus perustuu Cybersecurity Base MOOCin
-`part2-13.sessionhijack`-pankkiin. **Se on tarkoituksella turvaton.**
-Sitä saa käyttää **vain omalla koneella**, kuvitteellisilla käyttäjillä
-ja paikallisesti osoitteessa `127.0.0.1`. Älä julkaise palvelua verkkoon.
+This Django-app is based on part2-13.sessionhijack -task, as it provides a good basis for the software.
 
-## Käynnistys
-
-1. Asenna Python 3.10+.
-2. Pura ZIP ja avaa pääte sen kansioon, jossa `manage.py` on.
-3. Suorita:
+### Initial adjustments:
+1. Install new (enough) Python
+2. Unzip the file and copy the path of manage.py
+3. Run the followin lines:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -18,66 +14,58 @@ python manage.py seed_demo
 python manage.py runserver 127.0.0.1:8000
 ```
 
-4. Avaa `http://127.0.0.1:8000/login/`.
+4. Open `http://127.0.0.1:8000/login/`.
 
-`seed_demo` **palauttaa** joka kerralla testikäyttäjien salasanat, saldot
-ja PIN-koodit aloitusarvoihin sekä tyhjentää harjoituksen tapahtumalokin.
-Tämä on tarkoitettu testidatalle, ei oikeille tiedoille.
+`seed_demo` **resets** initial data and clears the log.
+### Accounts
 
-### Tunnukset
-
-| Käyttäjä | Salasana | Alkusaldo |
+| User | Password | Amount |
 | --- | --- | ---: |
 | bob | squarepants | 100 € |
 | alice | redqueen | 250 € |
 | patrick | asteroid | 42 € |
-| admin | admin | ei omaa tiliä |
+| admin | admin | No account |
 
-Admin voi katsoa sovelluksen tapahtumalokia osoitteessa `/audit/`.
+Only admin has access to event history from `/audit/`.
 
-## Viisi korjaamatonta haavoittuvuutta
+## Overview on the five Flaws from OWASP 2021.
 
-| OWASP 2021 | Missä koodissa? | Miten puute näkyy? |
+| OWASP 2021 | Where? | What happens? |
 | --- | --- | --- |
-| **A01 Broken Access Control** | `server/pages/views.py`: `balanceView` ja `transferView` | Bob voi nähdä Alicen saldon muuttamalla `user`-parametria. Tilisiirron `from_user` tulee asiakkaalta eikä omistajuutta tarkisteta. |
-| **A02 Cryptographic Failures** | `server/pages/models.py`: `Account.card_pin` | Kuvitteellinen kortin PIN tallennetaan tietokantaan sellaisenaan. Esimerkkikoodin näkee SQLite-tietokannasta tai Django-shellistä. |
-| **A03 Injection** | `server/pages/views.py`: `searchView` | `username` liitetään SQL-kyselyyn suoraan. Asiakashaku palauttaa muiden tilien tietoja SQL-injektiolla. |
-| **A07 Identification and Authentication Failures** | `server/config/simplesession.py` | Kirjautumisistuntojen tunnukset ovat ennustettavia (`session-0`, `session-1`, jne.). Vanha `src/hijacksession.py` havainnollistaa ongelman. |
-| **A09 Security Logging and Monitoring Failures** | `server/pages/views.py` ja `/login/` | Tilisiirroista ja epäonnistuneista kirjautumisista ei muodostu `AuditEvent`-merkintöjä. Adminin `/audit/` pysyy tyhjänä. |
+| **A01 Broken Access Control** | `server/pages/views.py`: `balanceView` ja `transferView` | Bob can see Alice's amount by changing the `user`-parameter. The Transfer `from_user` comes from the client without checking the permission. |
+| **A02 Cryptographic Failures** | `server/pages/models.py`: `Account.card_pin` | Card PIN is stored in the database as such. One can find it from the SQLite-database. |
+| **A03 Injection** | `server/pages/views.py`: `searchView` | `username` can be used to get data with SQL-Injection. |
+| **A07 Identification and Authentication Failures** | `server/config/simplesession.py` | Session ID is accessible and easily iterated (`session-0`, `session-1`, etc.). The old `src/hijacksession.py` shows this issue. |
+| **A09 Security Logging and Monitoring Failures** | `server/pages/views.py` and `/login/` | Event history is not working, no `AuditEvent`-logs. Admin's `/audit/` remains empty. |
 
-### Esimerkkejä puutteiden tutkimiseen
+### Examples for investigating vulnerabilities
 
-- A01: Kirjaudu Bobina ja avaa `/balance/?user=alice`.
-- A01: Muuta Bobin tilisiirtolomakkeen piilotettu `from_user`-kenttä
-  selaimen kehittäjätyökaluissa arvoksi `alice`.
-- A02: `python manage.py shell`, sitten
-  `from server.pages.models import Account` ja
-  `print(list(Account.objects.values_list('user__username', 'card_pin')))`.
-- A03: Asiakashakuun syöte `' OR 1=1 --`.
-- A07: Tutki istunnon `sessionid`-evästettä selaimen kehittäjätyökaluilla.
-- A09: Tee siirto ja väärä kirjautuminen, sitten avaa adminina `/audit/`.
+- A01: Log in as Bob and open `/balance/?user=alice`.
+- A01: In your browser's developer tools, change the hidden `from_user` field in Bob's transfer form to `alice`.
+- A02: Run `python manage.py shell`, then execute
+`from server.pages.models import Account` and
+`print(list(Account.objects.values_list('user__username', 'card_pin')))`.
+- A03: Enter `' OR 1=1 --` into the customer search field.
+- A07: Inspect the `sessionid` cookie using your browser's developer tools.
+- A09: Perform a transfer and an unsuccessful login attempt, then access `/audit/` as an administrator.
 
-## Testaus
+## Testing
 
 ```bash
 python manage.py test server.pages.test_owasp
 ```
 
-Seitsemän testiä vahvistaa nykyisen **haavoittuvan lähtötilan** sekä
-sovelluksen perustoiminnan. Kun korjaamme puutteet yksi kerrallaan,
-vaihdamme kyseisen OWASP-testin odottamaan turvallista toimintaa.
+Seven tests verify the current **vulnerable baseline state** as well as the application's core functionality. As we fix the vulnerabilities one by one, we will update the corresponding OWASP test to expect secure behavior.
 
-## Mitä on tarkoitus korjata myöhemmin?
+## What is intended to be fixed later?
 
-Korjauskierroksella käsitellään A01, A02, A03, A07 ja A09 erikseen.
-Tässä paketissa **mitään näistä viidestä ei ole korjattu**.
+During the remediation phase, A01, A02, A03, A07, and A09 will be addressed individually.
+In this package, **none of these five issues have been fixed**.
 
-### Muuta
+### Other notes
 
-- Siirto käyttää jo POST-pyyntöä, CSRF-tokenia ja tietokantatransaktiota,
-  jotta harjoituksen viisi puutetta pysyvät erillisinä.
-- Käyttäjien **kirjautumissalasanat** ovat Django-hash-muodossa;
-  A02-harjoituksen tarkoituksella selväkielinen tieto on **kortin PIN**.
-- Mukana on alkuperäinen istunnon tunnistusskripti `src/hijacksession.py`.
-- ZIP-versiossa vanhat MOOC/TMC-testiajurit ja vanha tietokanta on jätetty
-  pois. `migrate` ja `seed_demo` luovat toistettavan harjoitusympäristön.
+- The transfer operation already utilizes a POST request, a CSRF token, and a database transaction, ensuring that the five vulnerabilities covered in this exercise remain distinct from one another. - User **login passwords** are in Django hash format; 
+for the purpose of exercise A02, the data provided in plaintext is the **card PIN**.
+- The original session hijacking script, `src/hijacksession.py`, is included.
+- In the ZIP version, legacy MOOC/TMC test drivers and the old database have been
+omitted. Running `migrate` and `seed_demo` will create a reproducible exercise environment.
