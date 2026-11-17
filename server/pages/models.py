@@ -6,14 +6,17 @@ class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     balance = models.IntegerField()
 
-    # A02 Cryptographic Failures: a sensitive card PIN stored as PLAIN TEXT.
-    # The seed command populates distinct example PINs for the three users.
+    # A02 Cryptographic Failures:
+    # Card PIN is stored in plaintext in the database.
     card_pin = models.CharField(max_length=4, default='0000')
+
+    # A02 FIX: Replace the field above with the following.
+    # Increase max_length to accommodate a salted password hash.
+    # The PIN must also be hashed before saving (see seed_demo.py).
+    # card_pin = models.CharField(max_length=255, default='')
 
 
 class AuditEvent(models.Model):
-    """An empty audit trail until the A09 exercise is fixed."""
-
     created_at = models.DateTimeField(auto_now_add=True)
     username = models.CharField(max_length=150)
     event = models.CharField(max_length=100)

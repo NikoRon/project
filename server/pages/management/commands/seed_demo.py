@@ -1,8 +1,12 @@
+
 """Create ONLY fake, local banking data for the OWASP teaching exercise."""
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
+
+# A02 FIX: Import Django's password hashing function.
+# from django.contrib.auth.hashers import make_password
 
 from server.pages.models import Account, AuditEvent
 
@@ -19,6 +23,7 @@ class Command(BaseCommand):
             ('alice', 'redqueen', 250, '1357'),
             ('patrick', 'asteroid', 42, '9876'),
         )
+
         for username, password, balance, pin in demo_users:
             user, _ = User.objects.get_or_create(username=username)
             user.set_password(password)
@@ -26,9 +31,17 @@ class Command(BaseCommand):
             user.is_staff = False
             user.is_superuser = False
             user.save()
+
             Account.objects.update_or_create(
                 user=user,
+
+                # A02 Cryptographic Failures:
+                # The card PIN is stored in plaintext.
                 defaults={'balance': balance, 'card_pin': pin},
+
+                # A02 FIX: Replace the line above with the following.
+                # Hash the PIN before storing it in the database.
+                # defaults={'balance': balance, 'card_pin': make_password(pin)},
             )
 
         admin, _ = User.objects.get_or_create(username='admin')
