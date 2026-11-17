@@ -69,7 +69,9 @@ Users can see other users’ bank balance by changing the user-parameter in url 
 
 In index.html, the server should determine the sender by using request.user, not the client side. Hence, the fix is to remove from_user -input from line 39 (in index.html).
 
-In views.py, both balanceView- and transferView-functions need fixes. By changing the line 21 with commented line 24, the user cannot see others’ balances anymore with url-hacking. By replacing line 27 with commented line 31 the user can only access ther own account.
+In views.py, both balanceView- and transferView-functions need fixes. First balanceview: By changing the line 21 with commented line 24, the user cannot see others’ balances anymore with url-hacking. By replacing line 27 with commented line 31 the user can only access ther own account. Changes to transferView: The sender account it determined by client side at line 51. By replacing this with commented line 55 fixes the issue. In addition, line 72 has a flaw that doesn't ensure the account is user's own. By replacing it with commented line 76 fixes it by ensuring that only an authenticated user can access the view.
+
+
 
 Relevant screenshots: "A01 Logged in as Bob" shows the initial state when Bob has signed in to his account. When logged in, Bob can type ".../balance/?user=alice" into url and get the view that is seen with screenshot "A01 Access to Alice's balance via Bob's account".
 
