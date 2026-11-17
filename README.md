@@ -67,9 +67,9 @@ https://github.com/NikoRon/project/blob/83feb1a0406d9f9da215698b4756490d7f552630
 
 Users can see other users’ bank balance by changing the user-parameter in url directly. The access control is not done on server-side. These flaws are found in index.html and views.py. 
 
-In index.html, the server should determine the sender by using request.user, not the client side. Hence, the fix is to remove from_user -input from line 39 (in index.html).
+In `index.html`, the server should determine the sender by using request.user, not the client side. Hence, the fix is to remove `from_user` -input from line 39 (in index.html). Now one cannot change the `from_user`-value via browser's developer tools. Following fixes with `transferView` is related to this. 
 
-In views.py, both balanceView- and transferView-functions need fixes. First balanceview: By changing the line 21 with commented line 24, the user cannot see others’ balances anymore with url-hacking. By replacing line 27 with commented line 31 the user can only access ther own account. Changes to transferView: The sender account it determined by client side at line 51. By replacing this with commented line 55 fixes the issue. In addition, line 72 has a flaw that doesn't ensure the account is user's own. By replacing it with commented line 76 fixes it by ensuring that only an authenticated user can access the view.
+In `views.py`, both `balanceView`- and `transferView`-functions need fixes. First `balanceview`: By changing the line 21 with commented line 24, the user cannot see others’ balances anymore with url-hacking ( = .../balance/?=user='otheruser'). By replacing line 27 with commented line 31 the user can only access ther own account. Changes to `transferView`: The sender account it determined by client side at line 51. By replacing this with commented line 55 fixes the issue. In addition, line 72 has a flaw that doesn't ensure the account is user's own. By replacing it with commented line 76 fixes it by ensuring that only an authenticated user can access the view. After these fixes one cannot access other's balance via url or developer tools.
 
 
 
