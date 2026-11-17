@@ -51,7 +51,7 @@ The folder `Screenshots` contains relevant screenshots. Explanations for all pho
 - A07: Inspect the `sessionid` cookie using your browser's developer tools.
 - A09: Perform a transfer and an unsuccessful login attempt, then access `/audit/` as an administrator.
 
-### Flaw A01 - Broken Access Control
+## Flaw A01 - Broken Access Control
 
 Sources of flaw:
 
@@ -75,17 +75,23 @@ In `views.py`, both `balanceView`- and `transferView`-functions need fixes. Firs
 
 Relevant screenshots: "A01 Logged in as Bob" shows the initial state when Bob has signed in to his account. When logged in, Bob can type ".../balance/?user=alice" into url and get the view that is seen with screenshot "A01 Access to Alice's balance via Bob's account".
 
-### Flaw A02 - Cryptographic Failure
+## Flaw A02 - Cryptographic Failure
 
-The application stores users' four-digit card PINs directly in the database without cryptographic protection. Anyone with access to the database can read these PINs. In `models.py`, the card_pin field has a maximum length of four characters and is used to store the original PIN. In `seed_demo.py` (found at `server/pages/management/commands`), the PIN is inserted directly into the database using defaults={'balance': balance, 'card_pin': pin}.
+Sources:
 
-Fix:
+seed_demo.py:
+https://github.com/NikoRon/project/blob/10177959af82b6bde6d7b636d088f42ffadd4884/server/pages/management/commands/seed_demo.py#L40
+(as well as line 9!)
 
-In models.py, replacing the existing card_pin field with the commented version that supports longer password hashes.
+models.py:
+https://github.com/NikoRon/project/blob/10177959af82b6bde6d7b636d088f42ffadd4884/server/pages/models.py#L5
 
-In seed_demo.py, import Django's make_password function and replace the vulnerable database insertion with the commented version using make_password(pin).
+Screenshot `A02 PIN accessed via powershell` demonstrates the initial flaw before fixes are applied.
 
-This ensures that PINs are hashed before storage rather than saved as plaintext. The database schema must then be migrated, and the existing plaintext PINs must be replaced.
+The application stores users' four-digit card PINs directly in the database without cryptographic protection. Anyone with access to the database can read these PINs. In `models.py`, the card_pin field has a maximum length of four characters and is used to store the original PIN. In `seed_demo.py`, the PIN is inserted directly into the database using defaults={'balance': balance, 'card_pin': pin}.
+
+In `models.py`, replacing the existing card_pin field at line 11 with the commented version at line 16 that supports longer password hashes. In `seed_demo.py`, import Django's make_password function (line 9) and replace the vulnerable database insertion (line 40) with the commented version (line 44) using make_password(pin). This ensures that PINs are hashed before storage rather than saved as plaintext. The database schema must then be migrated, and the existing plaintext PINs must be replaced.
+
 ### Other notes
 
 - The transfer operation already utilizes a POST request, a CSRF token, and a database transaction, ensuring that the five vulnerabilities covered in this exercise remain distinct from one another. - User **login passwords** are in Django hash format; 
