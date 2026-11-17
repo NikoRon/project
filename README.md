@@ -28,12 +28,14 @@ python manage.py runserver
 
 Only admin has access to event history from `/audit/`.
 
+The folder `Screenshots` contains relevant screenshots. Explanations for all photos are given in this file.
+
 ## Overview on the five Flaws from OWASP 2021.
 
 | OWASP 2021 | Where flaws? | What happens? |
 | --- | --- | --- |
 | **A01 Broken Access Control** | `server/pages/views.py`: `balanceView` and `transferView` | Bob can see Alice's amount by changing the `user`-parameter. The Transfer `from_user` comes from the client without checking the permission. |
-| **A02 Cryptographic Failures** | `server/pages/models.py`: `Account.card_pin` | Card PIN is stored in the database as such. One can find it from the SQLite-database. |
+| **A02 Cryptographic Failure** | `server/pages/models.py`: `Account.card_pin` | Card PIN is stored in the database as such. One can find it from the SQLite-database. |
 | **A03 Injection** | `server/pages/views.py`: `searchView` | `username` can be used to get data with SQL-Injection. |
 | **A07 Identification and Authentication Failures** | `server/config/simplesession.py` | Session ID is accessible and easily iterated (`session-0`, `session-1`, etc.). The old `src/hijacksession.py` shows this issue. |
 | **A09 Security Logging and Monitoring Failures** | `server/pages/views.py` and `/login/` | Event history is not working, no `AuditEvent`-logs. Admin's `/audit/` remains empty. |
@@ -49,7 +51,29 @@ Only admin has access to event history from `/audit/`.
 - A07: Inspect the `sessionid` cookie using your browser's developer tools.
 - A09: Perform a transfer and an unsuccessful login attempt, then access `/audit/` as an administrator.
 
+### Flaw A01 - Broken Access Control
 
+Sources of flaw:
+
+Index.html:
+https://github.com/NikoRon/project/blob/83feb1a0406d9f9da215698b4756490d7f552630/server/pages/templates/pages/index.html#L39
+
+and views.py:
+balanceView:
+https://github.com/NikoRon/project/blob/83feb1a0406d9f9da215698b4756490d7f552630/server/pages/views.py#L14
+
+transferView:
+https://github.com/NikoRon/project/blob/83feb1a0406d9f9da215698b4756490d7f552630/server/pages/views.py#L47
+
+Users can see other users’ bank balance by changing the user-parameter in url directly. The access control is not done on server-side. These flaws are found in index.html and views.py. 
+
+In index.html, the server should determine the sender by using request.user, not the client side. Hence, the fix is to remove from_user -input from line 39 (in index.html).
+
+In views.py, both balanceView- and transferView-functions need fixes. By changing the line 21 with commented line 24, the user cannot see others’ balances anymore with url-hacking. By replacing line 27 with commented line 31 the user can only access ther own account.
+
+Relevant screenshots: "A01 Logged in as Bob" shows the initial state when Bob has signed in to his account. When logged in, Bob can type ".../balance/?user=alice" into url and get the view that is seen with screenshot "A01 Access to Alice's balance via Bob's account".
+
+### Flaw A02 - Cryptographic Failure
 
 
 ### Other notes
