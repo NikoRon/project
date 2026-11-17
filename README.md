@@ -30,7 +30,7 @@ Only admin has access to event history from `/audit/`.
 
 ## Overview on the five Flaws from OWASP 2021.
 
-| OWASP 2021 | Where? | What happens? |
+| OWASP 2021 | Where flaws? | What happens? |
 | --- | --- | --- |
 | **A01 Broken Access Control** | `server/pages/views.py`: `balanceView` and `transferView` | Bob can see Alice's amount by changing the `user`-parameter. The Transfer `from_user` comes from the client without checking the permission. |
 | **A02 Cryptographic Failures** | `server/pages/models.py`: `Account.card_pin` | Card PIN is stored in the database as such. One can find it from the SQLite-database. |
@@ -48,6 +48,9 @@ Only admin has access to event history from `/audit/`.
 - A03: Enter `' OR 1=1 --` into the customer search field.
 - A07: Inspect the `sessionid` cookie using your browser's developer tools.
 - A09: Perform a transfer and an unsuccessful login attempt, then access `/audit/` as an administrator.
+
+
+
 
 ### Other notes
 

@@ -30,6 +30,12 @@
         <h2>Transfer</h2>
         <form action="{% url 'transfer' %}" method="post">
             {% csrf_token %}
+            <!-- A01 Broken Access Control:
+            The sender is provided by the client and can be manipulated.
+
+            A01 FIX: Remove this following hidden input (line 39).
+            The server should determine the sender using request.user.
+            -->
             <input type="hidden" name="from_user" value="{{ user.username }}">
             <label>Receiver
                 <select name="to">
