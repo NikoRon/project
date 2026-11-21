@@ -92,6 +92,22 @@ The application stores users' four-digit card PINs directly in the database with
 
 In `models.py`, replacing the existing card_pin field at line 11 with the commented version at line 16 that supports longer password hashes. In `seed_demo.py`, import Django's make_password function (line 9) and replace the vulnerable database insertion (line 40) with the commented version (line 44) using make_password(pin). This ensures that PINs are hashed before storage rather than saved as plaintext. The database schema must then be migrated, and the existing plaintext PINs must be replaced.
 
+## Flaw A03 Injection
+
+Source:
+
+https://github.com/NikoRon/project/blob/8b7f52363ccb457c3600f6359124e9ca91a54ea2/server/pages/views.py#L107
+
+The customer search function uses raw SQL and inserts the user's input directly into the query string. The vulnerable code is between lines 107 and 111. Because the input is not parameterized, a user can manipulate the SQL query by entering SQL syntax into the search field. Bntering "' OR 1=1 --", one can modify the query's condition and return other usernames instead of only the requested account.
+
+The fix is to replace these lines with commented lines from 116 to 119. The username is now passed to the database as a parameter rather than being directly concatenated into the SQL statement. This prevents the input from being interpreted as executable SQL code.
+
+The initial vulnerability can be seen at the screenshot "A03 SQL Injection". 
+
+## Flaw A07 Identification and Authentification Failures
+
+
+
 ### Other notes
 
 - The transfer operation already utilizes a POST request, a CSRF token, and a database transaction, ensuring that the five vulnerabilities covered in this exercise remain distinct from one another. - User **login passwords** are in Django hash format; 
