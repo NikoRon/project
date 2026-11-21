@@ -94,18 +94,35 @@ def transferView(request):
     return redirect('home')
 
 
+
 @login_required
 def searchView(request):
     username = request.GET.get('username', '')
     results = []
+
     if username:
-        # A03 Injection: interpolating user input into SQL without parameters.
+        # A03 Injection:
+        # User input is directly inserted into the SQL query.
+        # An attacker can modify the query using SQL injection.
         query = f"SELECT username FROM auth_user WHERE username = '{username}'"
+
         with connection.cursor() as cursor:
             cursor.execute(query)
             results = cursor.fetchall()
 
-    return render(request, 'pages/search.html', {'username': username, 'results': results})
+        # A03 FIX: Use a parameterized query instead.
+        # The database treats username as data, not as SQL code.
+        #
+        # query = "SELECT username FROM auth_user WHERE username = %s"
+        # with connection.cursor() as cursor:
+        #     cursor.execute(query, [username])
+        #     results = cursor.fetchall()
+
+    return render(
+        request,
+        'pages/search.html',
+        {'username': username, 'results': results}
+    )
 
 
 @login_required
