@@ -108,7 +108,7 @@ The initial vulnerability can be seen at the screenshot "A03 SQL Injection".
 
 Sources:
 
-server/config/simplesession.py
+[server/config/simplesession.py](https://github.com/NikoRon/project/blob/1f3d13650ae9426ede9b27944c5653ccf510420f/server/config/simplesession.py#L7)
 
 [server/config/settings.py](https://github.com/NikoRon/project/blob/6e55d40959f6a12216979577541f23574d1f3b39/server/config/settings.py#L57)
 
@@ -116,17 +116,7 @@ The application uses a custom session engine that generates predictable session 
 
 The vulnerability can be demonstrated by logging in to Bob's account with Edge and into Alice's account with Chrome. The Screenshot `A07 Predictable sessionid` shows the situation where both accounts are logged into, with developer view (F12 showing the 'application'-site). As these sessions are currently running, one can for example double click Bob's side of developer view, and change the sessionid from value 'session-0' to 'session-1'. Now, typing 'http://127.0.0.1:8000/balance/' as url, Bob can see Alice's balance. 
 
-Fix:
-
-In server/config/settings.py, replace the vulnerable SESSION_ENGINE setting with the commented secure alternative:
-
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-
-Django's standard session engine generates cryptographically unpredictable session identifiers instead of sequential values. This makes guessing another user's session ID computationally infeasible.
-
-After applying the fix, existing predictable sessions should also be invalidated. Otherwise, previously issued session IDs may remain usable until they expire or are deleted.
-
-The vulnerable implementation and its commented fix are included in the source code.
+The fix is replace the vulnerable SESSION_ENGINE setting in `server/config/settings.py` line 57 with the commented, secure version at line 59. This line 59 is Django's standard session engine that generates unpredictable session id's instead of 0,1,2, etc. This makes guessing another user's session ID impossible.
 
 ### Other notes
 
