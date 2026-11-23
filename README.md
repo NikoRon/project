@@ -110,7 +110,7 @@ Sources:
 
 server/config/simplesession.py
 
-server/config/settings.py
+[server/config/settings.py](https://github.com/NikoRon/project/blob/6e55d40959f6a12216979577541f23574d1f3b39/server/config/settings.py#L57)
 
 The application uses a custom session engine that generates predictable session identifiers such as session-0, session-1, and session-2. This is an authentication vulnerability because an attacker can easily guess another user's session ID and impersonate that user without knowing their password.
 
