@@ -37,7 +37,7 @@ The folder `Screenshots` contains relevant screenshots. Explanations for all pho
 | **A01 Broken Access Control** | `server/pages/views.py`: `balanceView` and `transferView` | Bob can see Alice's amount by changing the `user`-parameter. The Transfer `from_user` comes from the client without checking the permission. |
 | **A02 Cryptographic Failures** | `server/pages/models.py`: `Account.card_pin` | Card PIN is stored in the database as such. One can find it from the SQLite-database. |
 | **A03 Injection** | `server/pages/views.py`: `searchView` | `username` can be used to get data with SQL-Injection. |
-| **A07 Identification and Authentication Failures** | `server/config/simplesession.py` | Session ID is accessible and easily iterated (`session-0`, `session-1`, etc.). The old `src/hijacksession.py` shows this issue. |
+| **A07 Identification and Authentication Failures** | `server/config/simplesession.py`: `server/config/settings.py` | Session ID is accessible and easily iterated (`session-0`, `session-1`, etc.). |
 | **A09 Security Logging and Monitoring Failures** | `server/pages/views.py` and `/login/` | Event history is not working, no `AuditEvent`-logs. Admin's `/audit/` remains empty. |
 
 ### Examples for demonstrating vulnerabilities
@@ -106,7 +106,27 @@ The initial vulnerability can be seen at the screenshot "A03 SQL Injection".
 
 ## Flaw A07 Identification and Authentification Failures
 
+Sources:
 
+server/config/simplesession.py
+
+server/config/settings.py
+
+The application uses a custom session engine that generates predictable session identifiers such as session-0, session-1, and session-2. This is an authentication vulnerability because an attacker can easily guess another user's session ID and impersonate that user without knowing their password.
+
+The vulnerability can be demonstrated by logging in to Bob's account with Edge and into Alice's account with Chrome. The Screenshot `A07 Predictable sessionid` shows the situation where both accounts are logged into, with developer view (F12 showing the 'application'-site). As these sessions are currently running, one can for example double click Bob's side of developer view, and change the sessionid from value 'session-0' to 'session-1'. Now, typing 'http://127.0.0.1:8000/balance/' as url, Bob can see Alice's balance. 
+
+Fix:
+
+In server/config/settings.py, replace the vulnerable SESSION_ENGINE setting with the commented secure alternative:
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
+Django's standard session engine generates cryptographically unpredictable session identifiers instead of sequential values. This makes guessing another user's session ID computationally infeasible.
+
+After applying the fix, existing predictable sessions should also be invalidated. Otherwise, previously issued session IDs may remain usable until they expire or are deleted.
+
+The vulnerable implementation and its commented fix are included in the source code.
 
 ### Other notes
 

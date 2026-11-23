@@ -51,7 +51,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'server.config.urls'
+
+# A07 Identification and Authentication Failures:
+# The engine now generates predictable session IDs: session-0, session-1, session-2, etc.
 SESSION_ENGINE = 'server.config.simplesession'
+# A07 FIX: Replace the line above with followgin Django's standard session engine, which generates unpredictable session IDs.
+# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 TEMPLATES = [
