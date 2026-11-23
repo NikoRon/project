@@ -7,6 +7,22 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
 from .models import Account, AuditEvent
+from django.contrib.auth.signals import user_login_failed
+from django.dispatch import receiver
+
+# A09 Security Logging and Monitoring Failures:
+# Failed login attempts are not recorded in AuditEvent. This makes repeated authentication attacks harder to investigate.
+
+# A09 FIX
+# @receiver(user_login_failed)
+# def log_failed_login(sender, credentials, request, **kwargs):
+#     username = credentials.get('username', 'unknown')
+#
+#     AuditEvent.objects.create(
+#         username=username,
+#         event='LOGIN_FAILED',
+#         details='Unsuccessful authentication attempt'
+#     )
 
 
 # A01 FIX: Require authentication before accessing account information.
@@ -89,10 +105,15 @@ def transferView(request):
         return HttpResponseBadRequest('Unknown account')
 
     # A09 Security Logging and Monitoring Failures:
-    # Deliberately NO AuditEvent for transfers or failed login attempts.
+    # Successful transfers are not recorded in the audit log. This makes it difficult to investigate suspicious transactions.
+    # AuditEvent.objects.create(
+    #     username=request.user.username,
+    #     event='TRANSFER_SUCCESS',
+    #     details=f'{from_username} -> {to_username}: {amount} EUR'
+    # )
     messages.success(request, 'Transfer completed.')
     return redirect('home')
-
+    
 
 
 @login_required
