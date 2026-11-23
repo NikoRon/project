@@ -43,12 +43,12 @@ The folder `Screenshots` contains relevant screenshots. Explanations for all pho
 ### Examples for demonstrating vulnerabilities
 
 - A01: Log in as Bob and open `/balance/?user=alice`.
-- A01: In your browser's developer tools, change the hidden `from_user` field in Bob's transfer form to `alice`.
+- A01: In browser's developer tools, change the hidden `from_user` field in Bob's transfer form to `alice`.
 - A02: Run `python manage.py shell`, then execute
 `from server.pages.models import Account` and
 `print(list(Account.objects.values_list('user__username', 'card_pin')))`.
 - A03: Enter `' OR 1=1 --` into the customer search field.
-- A07: Inspect the `sessionid` cookie using your browser's developer tools.
+- A07: Modify `sessionid` cookie using browser's developer tools -> application.
 - A09: Perform a transfer and an unsuccessful login attempt, then access `/audit/` as an administrator.
 
 ## Flaw A01 - Broken Access Control
@@ -118,7 +118,3 @@ The vulnerability can be demonstrated by logging in to Bob's account with Edge a
 
 The fix is replace the vulnerable SESSION_ENGINE setting in `server/config/settings.py` line 57 with the commented, secure version at line 59. This line 59 is Django's standard session engine that generates unpredictable session id's instead of 0,1,2, etc. This makes guessing another user's session ID impossible.
 
-### Other notes
-
-- The transfer operation already utilizes a POST request, a CSRF token, and a database transaction, ensuring that the five vulnerabilities covered in this exercise remain distinct from one another. - User **login passwords** are in Django hash format; 
-for the purpose of exercise A02, the data provided in plaintext is the **card PIN**.
